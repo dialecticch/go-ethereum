@@ -24,6 +24,8 @@ import (
 	"github.com/holiman/uint256"
 )
 
+// @TODO ADD TX INDEX
+
 var activators = map[int]func(*JumpTable){
 	3529: enable3529,
 	3198: enable3198,
