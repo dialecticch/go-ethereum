@@ -33,6 +33,7 @@ var activators = map[int]func(*JumpTable){
 	2200: enable2200,
 	1884: enable1884,
 	1344: enable1344,
+	1111: enableTxIndex, // @TODO
 }
 
 // EnableEIP enables the given EIP on the config.
@@ -170,9 +171,25 @@ func enable3198(jt *JumpTable) {
 	}
 }
 
+func enableTxIndex(jt *JumpTable) {
+	// New opcode
+	jt[TXINDEX] = &operation{
+		execute:     opTxIndex,
+		constantGas: GasQuickStep,
+		minStack:    minStack(0, 1),
+		maxStack:    maxStack(0, 1),
+	}
+}
+
 // opBaseFee implements BASEFEE opcode
 func opBaseFee(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
 	baseFee, _ := uint256.FromBig(interpreter.evm.Context.BaseFee)
 	scope.Stack.push(baseFee)
+	return nil, nil
+}
+
+// opTxIndex implements TXINDEX opcode
+func opTxIndex(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext) ([]byte, error) {
+	scope.Stack.push(new(uint256.Int).SetUint64(uint64(interpreter.evm.StateDB.TxIndex())))
 	return nil, nil
 }
